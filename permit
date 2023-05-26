@@ -13,9 +13,11 @@ chmod 770 -R "$location"
 setfacl -m user:HAD:rwx -R "$location"
 
 # All students can edit mess.txt
-setfacl -m group:inmates:rwx HAD/mess.txt
+setfacl -m group:inmates:rwx "$location"/HAD/mess.txt
 
-for hostel in $location/*; do
+mainfolders=($location/*)
+hostels=(${mainfolders[@]/"${location}/HAD"/})
+for hostel in "${hostels[@]}"; do
 
     wardendir=$hostel/${hostel##*/} # this is how we had chosen to name
                                     # the Wardens' home directories
@@ -23,7 +25,7 @@ for hostel in $location/*; do
 
     # Wardens can access any file in their own hostel
     # directory
-    setfacl -m user:"$wardenname":rwx "$hostel"
+    setfacl -m user:"$wardenname":rwx -R "$hostel"
 
 done
 
