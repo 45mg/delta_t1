@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# The directory in which the home directories are 
+# assumed to be
+location='/home'
+
+# Ensure only users can access their own files
+# (The group bit doesn't matter as all files'
+# groups are those of their owners)
+chmod 770 -R "$location"
+
+# HAD can view/edit all files
+setfacl -m user:HAD:rwx -R "$location"
+
+# All students can edit mess.txt
+setfacl -m group:inmates:rwx HAD/mess.txt
+
+for hostel in $location/*; do
+
+    wardendir=$hostel/${hostel##*/} # this is how we had chosen to name
+                                    # the Wardens' home directories
+    wardenname=$(stat --format '%U' "$wardendir")
+
+    # Wardens can access any file in their own hostel
+    # directory
+    setfacl -m user:"$wardenname":rwx "$hostel"
+
+done
+
