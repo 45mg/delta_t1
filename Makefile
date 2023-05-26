@@ -1,4 +1,4 @@
-SRC = genstudent permit updatedefaulter messallocation feebreakup bashrc feeBreakup.txt mess.txt
+SRC = gen-student permit update-defaulter mess-allocation fee-breakup bashrc feeBreakup.txt mess.txt
 
 all: install
 
