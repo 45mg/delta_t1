@@ -67,14 +67,21 @@ for line in "${lines[@]:1}"; do
     # Create user
     homedir=$homebase/$name
     useradd --create-home --shell /bin/bash -d "$homedir" "$name"
+    _add_aliases "$homedir" "$name"
     # ...and add them to the 'inmates'
     # group. This will come in handy later.
     usermod -a -G inmates "$name"
 
-    # Create fees.txt so other commands can
-    # find it
+    # Create fees.txt with the cumulative amounts
+    # set to 0
+    # TODO Since students should not be able to forge their fee
+    # payments, the file is owned by HAD. feeBreakup will be
+    # SUID HAD.
     sudo -u "$name" touch "$homedir/fees.txt"
-    _add_aliases "$homedir" "$name"
+
+    echo 'Cumulative amounts:' >> "$homedir/fees.txt"
+    cat /usr/share/deltaT1/feeBreakup.txt | sed -E 's/[0-9]+%/0/' >> "$homedir/fees.txt"
+    echo '----------' >> "$homedir/fees.txt"
 
     # Create userDetails.txt
     # Assumptions:
