@@ -10,6 +10,6 @@ install: ${SRC}
 uninstall:
 	@echo Expecting installed files to be ${DESTDIR}${PREFIX}/bin
 	@echo Removing installed files...
-	rm -f ${DESTDIR}${PREFIX}/bin/${SRC}
+	rm -f $(addprefix ${DESTDIR}${PREFIX}/bin/,${SRC})
 
 .PHONY: all install uninstall
