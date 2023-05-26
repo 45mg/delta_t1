@@ -16,10 +16,7 @@ Clone the repo, and run
 ```
 make
 ```
-This will install to `/bin` by default. To install to (for example) `/usr/local/bin`:
-```
-PREFIX=/usr/local make
-```
+This will install to `/usr/local/bin`, and data files go in `/usr/share`. Building in a chroot is supported through the DESTDIR option.
 
 ## Uninstall
 
