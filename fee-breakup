@@ -1,7 +1,8 @@
 #!/bin/bash
+set -x
 
 # path to the file to read fee breakups from
-breakupfile='./feeBreakup.txt'
+breakupfile='/usr/share/deltaT1/feeBreakup.txt'
 
 
 
@@ -21,7 +22,7 @@ for entry in "${lines[@]}"; do
     IFS=' ' read -r -a words <<<"$entry"
 
     categories=(${categories[@]} ${words[0]})
-    percentages=(${percentages[@]} ${words[1]%%'\%'})
+    percentages=(${percentages[@]} ${words[1]%%'%'})
 
     ((n=n+1))
 
@@ -48,7 +49,7 @@ for ((i=0;i<n;i++)); do
     amount=$(( $total_amount * ${percentages[i]} / 100 ))
 
     # Update cumulative amount
-    oldamount=$(grep -m 1 "$category" | grep -E -o '[0-9]+')
+    oldamount=$(grep -m 1 "$category" "$feesfile" | grep -E -o '[0-9]+')
     sed -i "0,/${category}/ s/${oldamount}/${amount}/"
 
     # Write transaction details
