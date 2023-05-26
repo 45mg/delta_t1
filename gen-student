@@ -76,8 +76,11 @@ for line in "${lines[@]:1}"; do
     # set to 0
     feesdir="${homedir}/fees"
     feestxt="${feesdir}/fees.txt"
-    sudo -u "$name" mkdir -p "$feesdir"
-    sudo -u "$name" touch "$feestxt"
+    mkdir -p "$feesdir"
+    touch "$feestxt"
+    # permissions (see README)
+    chown HAD:HAD "$feesdir"
+    setfacl -R -m user:"$name":rx "$feesdir"
 
     echo 'Cumulative amounts:' >> "$feestxt"
     cat /usr/share/deltaT1/feeBreakup.txt | sed -E 's/[0-9]+%/0/' >> "$feestxt"

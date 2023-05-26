@@ -45,7 +45,8 @@ I have improved on the basic instructions in several instances -
 
 - `fees.txt` is stored in its own directory for each student -
 If the `fees.txt` file for each student is placed directly inside their home directory, they can easily forge transactions by writing to the file, UNLESS the write-permissions for both the file AND the enclosing directory (their home directory) are removed. However, removing write permissions for the home directory will prevent the student from creating files/directories in their home directory!
-In order to fix this, the `fees.txt` is stored in a `fees` directory inside the home directory, which has no write permissions. The student could still delete this directory, but they would have no incentive to as it would erase the evidence of fee payment.
+In order to fix this, the `fees.txt` is stored in a `fees` directory inside the home directory, which is owned by HAD and has no permissions for anyone else. The student is then givem read permission via ACL. This effectively prevents them from modifying `fees.txt`.
+The script for `feeBreakup` is SUID HAD.
 
 ### Limitations
 

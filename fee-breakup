@@ -4,6 +4,7 @@
 breakupfile='/usr/share/deltaT1/feeBreakup.txt'
 
 
+echo $(id -nu)
 
 # Read the total amount from user
 [[ -n $1 ]] && total_amount=$1 || { echo "Usage: feeBreakup total_amount"; exit 1; }

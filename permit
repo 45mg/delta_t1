@@ -17,7 +17,7 @@ fi
 IFS=$'\n' chmod 711 $(find "$location" -type d)
 
 # No write access for all the 'fees' directories (see README)
-IFS=$'\n' chmod 511 $(find "$location" -name 'fees' -type d)
+# IFS=$'\n' chmod 511 $(find "$location" -name 'fees' -type d)
 
 # Base permissions for existing files - only users can read
 # their own files, and nothing else.
@@ -26,12 +26,9 @@ IFS=$'\n' chmod 400 $(find "$location" -type f)
 # HAD can view/edit all files
 setfacl -m user:HAD:rwx -R "$location"
 
-# fee-breakup must be SUID HAD; we will set the group
-# of each student's fees.txt to HAD. This is to prevent
-# forgery of transaction info.
-chmod 4755 /usr/local/bin/fee-breakup
-
+# fee-breakup must be SUID HAD (see README)
 chown HAD:HAD /usr/local/bin/fee-breakup
+chmod 4755 /usr/local/bin/fee-breakup
 
 # All students can edit mess.txt
 setfacl -m group:inmates:rwx "$location"/HAD/mess.txt
