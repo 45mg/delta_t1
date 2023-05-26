@@ -16,10 +16,11 @@ install: ${SRC} ${DEST}
 	mv ${HOME}/.bashrc.bak ${DESTDIR}/usr/share/deltaT1
 
 uninstall:
+	@echo Your pre-installation .bashrc will be copied back to ${HOME} as .bashrc.bak
+	@echo Please merge any changes you made since installation into it
+	mv ${DESTDIR}/usr/share/deltaT1/.bashrc.bak ${HOME}
 	rm -f $(addprefix ${DESTDIR}/usr/local/bin/,${SRC})
 	rm -f $(addprefix ${DESTDIR}/usr/share/deltaT1/,${DATA})
 	# reinstall backed-up bashrc
-	@echo Your old .bashrc will be copied back to ${HOME} as .bashrc.bak; please merge any changes made since installation
-	mv ${DESTDIR}/usr/share/deltaT1/.bashrc.bak ${HOME}
 
 .PHONY: all install uninstall
