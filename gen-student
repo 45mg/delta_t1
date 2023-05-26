@@ -1,8 +1,14 @@
 #!/bin/bash
-set -x
 
 # The directory in which to create the home directories
 location='/home'
+
+
+
+if [[ $(id -u) -ne 0 ]]; then
+    echo "Please run as root"
+    exit 0
+fi
 
 # Create a group for all students
 groupadd inmates
