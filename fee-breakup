@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# path to the file to read fee breakups from
+breakupfile='./feeBreakup.txt'
+
+
+
+# Read the total amount from user
+[[ -n $1 ]] && total_amount=$1 || { echo "Usage: feeBreakup total_amount"; exit 1; }
+
+# Read feeBreakup.txt and generate arrays of
+# category names and corresponding percentages
+
+categories=()
+percentages=()
+
+n=0
+readarray lines < "$breakupfile"
+for entry in "${lines[@]}"; do
+
+    IFS=' ' read -r -a words <<<"$entry"
+
+    categories=(${categories[@]} ${words[0]})
+    percentages=(${percentages[@]} ${words[1]%%'\%'})
+
+    ((n=n+1))
+
+done
+
+# Write to user's fees.txt
+
+feesfile=$HOME/fees.txt
+
+echo "\nFee payment on $(date):" >> "$feesfile"
+
+# Iterate over categories, updating the cumulative
+# amount and writing the transaction details at the
+# same time
+for ((i=0;i<n;i++)); do
+
+    category=${categories[i]}
+
+    # compute amount for i'th category
+    # Bash does not support floating-point arithmetic.
+    # Rather than require yet another utility to be
+    # installed, we will simply disregard the decimal
+    # point.
+    amount=$(( $total_amount * ${percentages[i]} / 100 ))
+
+    # Update cumulative amount
+    oldamount=$(grep -m 1 "$category" | grep -E -o '[0-9]+')
+    sed -i "0,/${category}/ s/${oldamount}/${amount}/"
+
+    # Write transaction details
+    echo "${categories[i]} ${amount}" | tee -a "$feesfile"
+
+done
