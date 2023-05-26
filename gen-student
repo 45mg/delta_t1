@@ -3,8 +3,6 @@
 # The directory in which to create the home directories
 location='/home'
 
-# Copies your .bashrc file to all the other directories
-
 
 
 if [[ $(id -u) -ne 0 ]]; then
@@ -17,9 +15,18 @@ groupadd inmates
 # (Yes, hostel residents are called 'inmates'
 #  as per the rulebooks. Rather fitting.)
 
+# Convenience function to add aliases to a .bashrc
+# Parameters - 1) the user's home directory 2) Username
+_add_aliases() {
+    sudo -u "$2" touch "$1"/.bashrc
+    cat /usr/share/deltaT1/aliasdefs.mk >> "$1"/.bashrc
+}
+
+
 # Create HAD's account
 useradd --create-home --shell /bin/bash -d "$location/HAD" "HAD"
 sudo -u HAD touch "$location/HAD/mess.txt"
+_add_aliases "$location/HAD" HAD
 
 # Read lines from studentDetails.txt or stdin, and
 # perform the required tasks
@@ -42,6 +49,7 @@ for line in "${lines[@]:1}"; do
         mkdir "$hosteldir"
         # Add user for Warden
         useradd --create-home --shell /bin/bash -d "$hosteldir/$hostel" "$wardenname"
+        _add_aliases "$hosteldir"/"$hostel" "$wardenname"
         # Make the hostel directory belong to the Warden
         chown "$wardenname" "$hosteldir" && chgrp "$wardenname" "$hosteldir"
         # Add announcements.txt, feeDefaulters.txt
@@ -66,13 +74,13 @@ for line in "${lines[@]:1}"; do
     # Create fees.txt so other commands can
     # find it
     sudo -u "$name" touch "$homedir/fees.txt"
+    _add_aliases "$homedir" "$name"
 
     # Create userDetails.txt
     # Assumptions:
     # - all students are first-years
     # - all students are from ECE (obv. since best department :P )
-    # - 'Month' refers to the month of
-    #   account creation
+    # - 'Month' refers to the month of account creation
 
     # writes details to file
     wd() {
