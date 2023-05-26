@@ -3,6 +3,8 @@
 # The directory in which to create the home directories
 location='/home'
 
+# Copies your .bashrc file to all the other directories
+
 
 
 if [[ $(id -u) -ne 0 ]]; then
@@ -16,7 +18,7 @@ groupadd inmates
 #  as per the rulebooks. Rather fitting.)
 
 # Create HAD's account
-useradd --create-home -d "$location/HAD" "HAD"
+useradd --create-home --shell /bin/bash -d "$location/HAD" "HAD"
 sudo -u HAD touch "$location/HAD/mess.txt"
 
 # Read lines from studentDetails.txt or stdin, and
@@ -39,11 +41,10 @@ for line in "${lines[@]:1}"; do
     if ! [[ -d "$hosteldir" ]]; then
         mkdir "$hosteldir"
         # Add user for Warden
-        useradd --create-home -d "$hosteldir/$hostel" "$wardenname"
+        useradd --create-home --shell /bin/bash -d "$hosteldir/$hostel" "$wardenname"
         # Make the hostel directory belong to the Warden
         chown "$wardenname" "$hosteldir" && chgrp "$wardenname" "$hosteldir"
         # Add announcements.txt, feeDefaulters.txt
-        echo $(ls -l "$hosteldir")
         sudo -u "$wardenname" touch "$hosteldir/announcements.txt"
         sudo -u "$wardenname" touch "$hosteldir/feeDefaulters.txt"
     fi
@@ -57,7 +58,7 @@ for line in "${lines[@]:1}"; do
 
     # Create user
     homedir=$homebase/$name
-    useradd --create-home -d "$homedir" "$name"
+    useradd --create-home --shell /bin/bash -d "$homedir" "$name"
     # ...and add them to the 'inmates'
     # group. This will come in handy later.
     usermod -a -G inmates "$name"
