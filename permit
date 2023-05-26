@@ -11,13 +11,27 @@ if [[ $(id -u) -ne 0 ]]; then
     exit 0
 fi
 
-# Ensure only users can access their own files
-# (The group bit doesn't matter as all files'
-# groups are those of their owners)
-chmod 771 -R "$location"
+# Base permissions for existing directories - execute bit
+# is needed to search/list directories.
+# Write bit is needed to be able to create subdirectories.
+IFS=$'\n' chmod 711 $(find "$location" -type d)
+
+# No write access for all the 'fees' directories (see README)
+IFS=$'\n' chmod 511 $(find "$location" -name 'fees' -type d)
+
+# Base permissions for existing files - only users can read
+# their own files, and nothing else.
+IFS=$'\n' chmod 400 $(find "$location" -type f)
 
 # HAD can view/edit all files
 setfacl -m user:HAD:rwx -R "$location"
+
+# fee-breakup must be SUID HAD; we will set the group
+# of each student's fees.txt to HAD. This is to prevent
+# forgery of transaction info.
+chmod 4755 /usr/local/bin/fee-breakup
+
+chown HAD:HAD /usr/local/bin/fee-breakup
 
 # All students can edit mess.txt
 setfacl -m group:inmates:rwx "$location"/HAD/mess.txt

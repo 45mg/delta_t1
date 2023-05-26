@@ -29,7 +29,7 @@ done
 
 # Write to user's fees.txt
 
-feesfile=$HOME/fees.txt
+feesfile=$HOME/fees/fees.txt
 
 echo $'\n'"Fee payment on $(date):" >> "$feesfile"
 

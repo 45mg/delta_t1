@@ -74,14 +74,14 @@ for line in "${lines[@]:1}"; do
 
     # Create fees.txt with the cumulative amounts
     # set to 0
-    # TODO Since students should not be able to forge their fee
-    # payments, the file is owned by HAD. feeBreakup will be
-    # SUID HAD.
-    sudo -u "$name" touch "$homedir/fees.txt"
+    feesdir="${homedir}/fees"
+    feestxt="${feesdir}/fees.txt"
+    sudo -u "$name" mkdir -p "$feesdir"
+    sudo -u "$name" touch "$feestxt"
 
-    echo 'Cumulative amounts:' >> "$homedir/fees.txt"
-    cat /usr/share/deltaT1/feeBreakup.txt | sed -E 's/[0-9]+%/0/' >> "$homedir/fees.txt"
-    echo '----------' >> "$homedir/fees.txt"
+    echo 'Cumulative amounts:' >> "$feestxt"
+    cat /usr/share/deltaT1/feeBreakup.txt | sed -E 's/[0-9]+%/0/' >> "$feestxt"
+    echo '----------' >> "$feestxt"
 
     # Create userDetails.txt
     # Assumptions:

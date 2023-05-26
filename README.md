@@ -31,3 +31,24 @@ The saved .bashrc will be restored; you have to manually reconcile any differenc
 ## Setup
 
 Clone this repo in a clean Unix environment. It may be helpful to create a Docker image or chroot directory for this purpose.
+
+## General Info
+
+### Improvements
+
+I have improved on the basic instructions in several instances -
+
+- The use of a Makefile for installation, instead of a regular Bash script - 
+    - allows for easier installation. 
+    - By adding scripts to PATH, the aliases themselves can just call these scripts. The alternative would be to put all the code in every user's .bashrc, cluttering their configuration files with several hundred lines of code.
+    - Automated uninstallation (`make uninstall`) is also possible.
+
+- `fees.txt` is stored in its own directory for each student -
+If the `fees.txt` file for each student is placed directly inside their home directory, they can easily forge transactions by writing to the file, UNLESS the write-permissions for both the file AND the enclosing directory (their home directory) are removed. However, removing write permissions for the home directory will prevent the student from creating files/directories in their home directory!
+In order to fix this, the `fees.txt` is stored in a `fees` directory inside the home directory, which has no write permissions. The student could still delete this directory, but they would have no incentive to as it would erase the evidence of fee payment.
+
+### Limitations
+
+- The `mess.txt` file can be edited by anyone; this means that students can forge mess allocations. This cannot be mitigated without contradicting the given instructions.
+
+- Bash cannot perform floating-point arithmetic. To avoid requiring another external utility for this purpose, the fee amounts are truncated to ints, sacrificing precision for simplicity.
