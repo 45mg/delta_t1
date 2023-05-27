@@ -51,7 +51,7 @@ for ((i=0;i<n;i++)); do
     # Update cumulative amount
     oldamount=$(grep -m 1 "$category" "$feesfile" | grep -E -o '[0-9]+')
     newamount=$(($oldamount+$amount))
-    sed -i "0,/${category}/ s/${oldamount}/${newamount}/" "$feesfile"
+    sed -i "0,/${category}/ s/${category} ${oldamount}/${category} ${newamount}/" "$feesfile"
 
     # Write transaction details
     echo "${categories[i]} ${amount}" | tee -a "$feesfile"

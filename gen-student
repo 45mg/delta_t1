@@ -78,9 +78,7 @@ for line in "${lines[@]:1}"; do
     feestxt="${feesdir}/fees.txt"
     mkdir -p "$feesdir"
     touch "$feestxt"
-    # permissions (see README)
-    chown HAD:HAD "$feesdir"
-    setfacl -R -m user:"$name":rx "$feesdir"
+    chown -R HAD:HAD "$feesdir" # (see README)
 
     echo 'Cumulative amounts:' >> "$feestxt"
     cat /usr/share/deltaT1/feeBreakup.txt | sed -E 's/[0-9]+%/0/' >> "$feestxt"
