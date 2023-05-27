@@ -32,6 +32,7 @@ chown HAD:HAD /usr/local/bin/fee-breakup
 chmod 4755 /usr/local/bin/fee-breakup
 
 # All students can edit mess.txt
+chmod 770 "$location"/HAD/mess.txt
 setfacl -m group:inmates:rwx "$location"/HAD/mess.txt
 
 mainfolders=($location/*)

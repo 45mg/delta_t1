@@ -1,0 +1,36 @@
+#!/bin/bash
+set -x
+
+location='/home' # where the homedirs were created
+messtxt="$location"/HAD/mess.txt
+
+
+if [[ $(id -u) -eq $(id -u 'HAD') ]]; then
+# if [[ 1 -eq 1 ]]; then
+
+    messCapacities=(0) #index should start from 1
+
+    while IFS=' ' read -r num cap; do
+        i+=1
+        messCapacities[num]=$cap
+    done < "$messtxt"
+
+    for filepath in $(IFS=$'\n' find "$location" -name 'userDetails.txt'); do
+
+        pref=$(sed -nE 's/Mess: ([0-9]+)/\1/p' < "$filepath")
+
+        if [[ ${messCapacities[pref]} -gt 0 ]]; then
+
+            # Allocate mess
+            ((messCapacities[pref]-=1))
+
+            # update student's userDetails.txt
+            sed -Ei 's/(MessPref:).*/\1 '"${pref}/" "$filepath"
+            # update mess.txt
+            echo $(sed -nE 's/Roll no\.: ([0-9]+)/\1/p' < "$filepath") >> "$messtxt"
+
+        fi
+
+    done
+
+fi

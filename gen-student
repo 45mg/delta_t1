@@ -24,9 +24,10 @@ _add_aliases() {
 
 
 # Create HAD's account
-useradd --create-home --shell /bin/bash -d "$location/HAD" "HAD"
-sudo -u HAD touch "$location/HAD/mess.txt"
-_add_aliases "$location/HAD" HAD
+useradd --create-home --shell /bin/bash -d "$location"/HAD HAD
+cp /usr/share/deltaT1/mess.txt "$location"/HAD
+chown HAD:HAD "$location"/HAD/mess.txt
+_add_aliases "$location"/HAD HAD
 
 # Read lines from studentDetails.txt or stdin, and
 # perform the required tasks
