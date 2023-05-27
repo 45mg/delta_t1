@@ -1,0 +1,52 @@
+#!/bin/bash
+
+location=$HOME/..
+
+
+
+{ [[ -n "$1" ]] && ! [[ "$1" == '--help' ]]; } && limit=$(date +%s -d "$1") || {
+    echo "Usage: updateDefaulter yymmdd"
+    echo "defaulter -> anyone who has not paid before given date."
+    exit 1;
+}
+
+tempfile=$(mktemp)
+
+# Get a list of all fees.txt files
+readarray feefiles < <(find "$location" -name 'fees.txt' -type f)
+
+# List each file with its most recent payment timestamp in the temp file
+# If timestamp is not before given date, do not add to list; instead, add
+# student's rollno. to feeDefaulters.txt
+for path in "${feefiles[@]}"; do
+
+    # Get a UNIX timestamp of the most recent transaction recorded in the file
+    timestamp=$(tac "$path" | grep 'Fee payment on' | cut -f4 -d' ' | date +%s -d)
+
+    # Get name of student
+    name=$(sed -nE 's/Name: (.*)/\1/p' "$path")
+
+    # Get rollno of student
+    rollno=$(grep -o -E '[0-9]{9}' "$path")
+
+    if [[ $timestamp -lt $limit ]]; then # student is defaulter
+
+        echo "$rollno" > "$location"/feeDefaulters.txt
+
+    else # add to the list
+
+        printf '%s %s %s\n' "$timestamp" "$name" "$rollno" >> "$tempfile"
+
+    fi
+
+done
+
+# Sort the list
+sort -k1,1 -n -o "$tempfile"{,}
+
+# Add top 5 students to announcements.txt
+readarray -n 5 lines < <(cat "$tempfile" | cut -f2,3 -d' ')
+echo 'The following are the first 5 students to pay fees:' > "$location"/announcements.txt
+printf '%s\n' "${lines[@]}" > "$location"/announcements.txt
+
+rm -f "$tempfile"

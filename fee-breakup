@@ -32,7 +32,7 @@ done
 
 feesfile=$HOME/fees/fees.txt
 
-echo $'\n'"Fee payment on $(date):" >> "$feesfile"
+echo $'\n'"Fee payment on $(date -Is)" >> "$feesfile"
 
 # Iterate over categories, updating the cumulative
 # amount and writing the transaction details at the
