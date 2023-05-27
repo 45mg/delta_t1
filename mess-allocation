@@ -1,36 +1,84 @@
 #!/bin/bash
-set -x
 
 location='/home' # where the homedirs were created
 messtxt="$location"/HAD/mess.txt
 
 
-if [[ $(id -u) -eq $(id -u 'HAD') ]]; then
-# if [[ 1 -eq 1 ]]; then
 
-    messCapacities=(0) #index should start from 1
+# `sed -i` creates a new file with the current user's
+# UID/GID, which results in users not being able to
+# edit their files as they are now owned by HAD.
+# The workaround is to write to a temporary file, then
+# `cat` that file into the original one.
+tempfile=$(mktemp)
+
+# If user is HAD, allocate messes to students
+#
+# Order of filing preferences is determined by
+# the order of the rollnos appended to mess.txt
+if [[ $(id -u) -eq $(id -u 'HAD') ]]; then
+
+    messCapacities=() #index->messno.; value->capacity
 
     while IFS=' ' read -r num cap; do
-        i+=1
         messCapacities[num]=$cap
     done < "$messtxt"
 
-    for filepath in $(IFS=$'\n' find "$location" -name 'userDetails.txt'); do
+    IFS=$'\n' echo "${messCapacities[@]}" dfdf
 
-        pref=$(sed -nE 's/Mess: ([0-9]+)/\1/p' < "$filepath")
+    # List of paths of all the userDetails.txt files
+    readarray userfiles < <(find "$location" -name 'userDetails.txt')
+
+    # The rollnos. of students who have filed their preferences
+    readarray filed < <(grep -o -E '[0-9]{9}' mess.txt)
+
+    # We rely on grep to have outputted the rollnos. in order
+    for rollno in ${filed[@]}; do
+
+        # As the deletion command at the end of this loop
+        # removes any duplicates, we must ensure that the
+        # current rollno. was not removed for this reason
+        [[ -z "$(grep -o -E '[0-9]{9}' mess.txt)" ]] && continue
+
+        # Find the user file corresponding to the roll no.
+        userfile=$(grep "$rollno" ${userfiles[@]} | cut -f1 -d:)
+
+        pref=$(sed -nE 's/Mess Pref: ([0-9]+)/\1/p' "$userfile")
 
         if [[ ${messCapacities[pref]} -gt 0 ]]; then
-
             # Allocate mess
             ((messCapacities[pref]-=1))
-
             # update student's userDetails.txt
-            sed -Ei 's/(MessPref:).*/\1 '"${pref}/" "$filepath"
-            # update mess.txt
-            echo $(sed -nE 's/Roll no\.: ([0-9]+)/\1/p' < "$filepath") >> "$messtxt"
-
+            sed -E 's/(Mess:).*/\1 '"${pref}/" "$userfile" > "$tempfile"
+            cat "$tempfile" > "$userfile"
         fi
-
+        # Remove the roll no. from mess.txt
+        sed -i "s/${rollno}//" "$messtxt"
     done
 
+    # Update the mess capacities in the file
+    for ((i=1;i<"${#messCapacities[@]}";i++)); do
+        sed -Ei "$(($i+1))"',/Student Preferences/ s/([0-9]+) [0-9]+/\1 '"${messCapacities[i]}/" "$messtxt"
+    done
+
+
+
+# If user is an inmate (heh, inmates), file preference
+elif [[ $(id -nG) =~ 'inmates' ]]; then 
+
+    # Mess pref should be given as argument
+    { [[ -n "$1" ]] && [[ "$1" != 'help' ]]; } && pref=$1 || {
+        echo 'Usage: messAllocation mess_number';
+        exit 1;
+    }
+
+    # update userDetails.txt
+    userfile=${HOME}/userDetails.txt
+    sed -Ei 's/(Mess Pref: ).*/\1'"${pref}/" "$userfile"
+
+    # update mess.txt
+    echo $(sed -nE 's/Roll no\.: ([0-9]+)/\1/p' "$userfile") >> "$messtxt"
+
 fi
+
+rm -f "$tempfile"
