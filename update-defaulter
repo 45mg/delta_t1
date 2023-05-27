@@ -1,6 +1,7 @@
 #!/bin/bash
+set -x
 
-location=$HOME/..
+location=$(dirname "$HOME")
 
 
 
@@ -13,7 +14,7 @@ location=$HOME/..
 tempfile=$(mktemp)
 
 # Get a list of all fees.txt files
-readarray feefiles < <(find "$location" -name 'fees.txt' -type f)
+readarray -t feefiles < <(find "$location" -name 'fees.txt' -type f)
 
 # List each file with its most recent payment timestamp in the temp file
 # If timestamp is not before given date, do not add to list; instead, add
@@ -21,17 +22,20 @@ readarray feefiles < <(find "$location" -name 'fees.txt' -type f)
 for path in "${feefiles[@]}"; do
 
     # Get a UNIX timestamp of the most recent transaction recorded in the file
-    timestamp=$(tac "$path" | grep 'Fee payment on' | cut -f4 -d' ' | date +%s -d)
+    timestamp=$(tac "$path" | grep 'Fee payment on' | cut -f4 -d' ' | xargs date +%s -d)
+
+    # Get the student's userDetails.txt
+    userfile=$(dirname $(dirname "$path"))/userDetails.txt
 
     # Get name of student
-    name=$(sed -nE 's/Name: (.*)/\1/p' "$path")
+    name=$(sed -nE 's/Name: (.*)/\1/p' "$userfile")
 
     # Get rollno of student
-    rollno=$(grep -o -E '[0-9]{9}' "$path")
+    rollno=$(grep -o -E '[0-9]{9}' "$userfile")
 
-    if [[ $timestamp -lt $limit ]]; then # student is defaulter
+    if [[ -z $timestamp ]] || [[ $timestamp -gt $limit ]]; then # student is defaulter
 
-        echo "$rollno" > "$location"/feeDefaulters.txt
+        printf '%s %s\n' "$name" "$rollno" >> "$location"/feeDefaulters.txt
 
     else # add to the list
 
@@ -47,6 +51,6 @@ sort -k1,1 -n -o "$tempfile"{,}
 # Add top 5 students to announcements.txt
 readarray -n 5 lines < <(cat "$tempfile" | cut -f2,3 -d' ')
 echo 'The following are the first 5 students to pay fees:' > "$location"/announcements.txt
-printf '%s\n' "${lines[@]}" > "$location"/announcements.txt
+printf '%s\n' "${lines[@]}" >> "$location"/announcements.txt
 
 rm -f "$tempfile"
