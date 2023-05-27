@@ -49,7 +49,9 @@ The script for `feeBreakup` is SUID HAD.
 
 ### Limitations
 
-- The `mess.txt` file can be edited by anyone; this means that students can forge mess allocations. This cannot be mitigated without contradicting the given instructions.
+- The `mess.txt` file can be edited by anyone; this means that students can tamper with it in many ways, such as filing preferences multiple times, or just directly editing it maliciously. This cannot be mitigated without contradicting the given instructions.
+
+- A student can remove the ACLs from their home directory and any directory under it, meaning they can prevent the HAD or warden from seeing it. Even if ACLs were not used, this issue would persist; as long as the user has write access to an item, they can change its permissions and/or ACLs.
 
 - Bash cannot perform floating-point arithmetic. To avoid requiring another external utility for this purpose, the fee amounts are truncated to ints, sacrificing precision for simplicity.
 
